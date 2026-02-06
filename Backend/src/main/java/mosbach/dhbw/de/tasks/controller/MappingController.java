@@ -355,12 +355,7 @@ public class MappingController {
             List<TimeConv> MealTimes = mealManager.readTime(user);
             List<Integer> RecipeIDS = mealManager.readMealPlanRecipeIds(user);
             List<String> RecipeNames = recipeManager.readRecipeNamesByIds(RecipeIDS);
-
-            //Hier später Datenbank abfragen
-            List<SendNutriConv> NutritionValues = new ArrayList<>();
-            for (int i = 0; i < RecipeNames.size(); i++) {
-                NutritionValues.add(new SendNutriConv(0, 0, 0, 0));
-            }
+            List<SendNutriConv> NutritionValues = recipeManager.readNutritionByIds(RecipeIDS);
 
             // Protokollieren der Listenlängen
             Logger.getLogger(MealPlanConverter.class.getName()).log(Level.INFO, "RecipeNames size: " + RecipeNames.size());

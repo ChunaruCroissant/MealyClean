@@ -314,6 +314,42 @@ public class RecipeManager {
     }
 
     @Transactional(readOnly = true)
+    public List<SendNutriConv> readNutritionByIds(List<Integer> recipeIds) {
+        if (recipeIds == null || recipeIds.isEmpty()) {
+            return List.of();
+        }
+
+        // Convert to Long list, keep order duplicates in output later
+        List<Long> ids = recipeIds.stream()
+                .filter(Objects::nonNull)
+                .map(Integer::longValue)
+                .toList();
+
+        // One DB call (may return in any order!)
+        Map<Long, SendNutriConv> nutriById = new HashMap<>();
+        for (RecipeEntity r : recipeRepo.findAllById(ids)) {
+            nutriById.put(r.getId(), new SendNutriConv(
+                    safe0(r.getCaloriesKcal()),
+                    safe0(r.getProteinG()),
+                    safe0(r.getTotalCarbohydratesG()),
+                    safe0(r.getTotalFatG())
+            ));
+        }
+
+        // Rebuild list in the same order as recipeIds
+        List<SendNutriConv> nutrition = new ArrayList<>(recipeIds.size());
+        for (Integer id : recipeIds) {
+            if (id == null) {
+                nutrition.add(new SendNutriConv(0, 0, 0, 0)); // empty slot
+            } else {
+                nutrition.add(nutriById.getOrDefault(id.longValue(), new SendNutriConv(0, 0, 0, 0)));
+            }
+        }
+        return nutrition;
+    }
+
+
+    @Transactional(readOnly = true)
     public List<String> readRecipeIngredientName(int id) {
         return recipeRepo.findById((long) id)
                 .map(r -> r.getIngredients().stream().map(IngredientValue::getName).toList())
