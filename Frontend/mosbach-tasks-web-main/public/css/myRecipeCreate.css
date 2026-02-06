@@ -1,0 +1,201 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f7f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    background-color: #086A87;
+    padding: 10px 0;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar {
+    background-color: #086A87;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    flex: 1;
+}
+
+.navbar ul li {
+    display: inline;
+}
+
+.navbar ul li a {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 10px 20px;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.navbar ul li a.active {
+    color: #333;
+    background-color: #f4fbfa;
+    border-radius: 5px;
+}
+
+.navbar ul li a:hover {
+    background-color: #065f6a;
+}
+
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 100px 20px;
+    width: 80%;
+    max-width: 600px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #0295A9;
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.action-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 15px 30px;
+    background-color: #086A87;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 10px; /
+    transition: background-color 0.3s;
+}
+
+.action-btn:hover {
+    background-color: #055f6a;
+}
+
+input[type="email"],
+input[type="password"] {
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #086A87;
+}
+
+.recipe-container {
+    background-color: #ffffff;
+    padding: 40px;
+    width: 80%;
+    max-width: 600px;
+    margin: 20px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.recipe-title {
+    font-size: 2em;
+    color: #086A87;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.form-section {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-section label {
+    font-weight: bold;
+    color: #333;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-section input[type="text"],
+.form-section input[type="number"],
+.form-section input[type="file"],
+.form-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.form-section input[type="text"]:focus,
+.form-section input[type="number"]:focus,
+.form-section input[type="file"]:focus,
+.form-section textarea:focus {
+    border-color: #086A87;
+}
+
+.submit-btn {
+    background-color: #0295A9;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #065f71;
+}
+
+.form-section input[type="number"] {
+    width: calc(25% - 10px);
+    margin-right: 10px;
+}
+
+.form-section input[type="file"] {
+    background-color: #f9f9f9;
+    padding: 8px;
+}

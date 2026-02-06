@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezeptsammlung - Mealy</title>
+    <link rel="stylesheet" href="../css/myRecipeCollection.css">
+    <link rel="icon" href="../Logo/Mealy-Favicon.ico">
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/RecipeCollection.js"></script>
+</head>
+<body>
+<header>
+    <nav class="navbar">
+        <ul>
+            <li><a href="Hompage2.html">HOME</a></li>
+            <li><a href="RecipeCollection.html" class="active">REZEPTSAMMLUNG</a></li>
+            <li><a href="Mealplan.html">MEALPLAN</a></li>
+            <li><a href="Profile.html">PROFIL</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="recipe-container">
+    <h1 class="recipe-title">Meine Rezepte</h1>
+
+    <button class="action-btn" onclick="window.location.href='Recipe.html'">Neues Rezept hinzufügen</button>
+
+
+    <div id="recipe-list" class="recipe-list"></div>
+</div>
+
+</body>
+</html>

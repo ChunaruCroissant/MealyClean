@@ -1,0 +1,42 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f7f5; /* Helles Türkis für Hintergrund */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.success-container {
+    width: 320px;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.logo img {
+    width: 60px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 24px;
+    color: #086A87;
+    margin: 0 0 10px;
+}
+
+p {
+    margin: 10px 0;
+}
+
+a {
+    color: #086A87;
+    text-decoration: underline;
+}
+
+a:hover {
+    text-decoration: none;
+}

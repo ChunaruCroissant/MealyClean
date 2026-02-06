@@ -1,0 +1,21 @@
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Java / Maven
+**/target/
+*.log
+
+# Node / Frontend tooling (falls jemals genutzt)
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / Secrets
+.env
+.env.*

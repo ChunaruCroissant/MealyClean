@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rezept erstellen - Mealy</title>
+  <link rel="stylesheet" href="../css/myRecipeCreate.css">
+  <link rel="icon" href="../Logo/Mealy-Favicon.ico">
+  <script src="../js/jquery-3.6.0.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/Recipe.js"></script>
+</head>
+<body>
+<header>
+  <nav class="navbar">
+    <ul>
+      <li><a href="Hompage2.html">HOME</a></li>
+      <li><a href="RecipeCollection.html">REZEPTSAMMLUNG</a></li>
+      <li><a href="Mealplan.html">MEALPLAN</a></li>
+      <li><a href="Profile.html">PROFIL</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="recipe-container">
+  <h1 class="recipe-title">Rezept Erstellen</h1>
+
+  <form id="recipe-form" action="#" method="POST"><!-- War broken -RL -->
+    <div class="form-section">
+      <label for="recipe-name">Rezeptname:</label>
+      <input type="text" id="recipe-name" name="recipe_name" placeholder="Gib den Namen deines Rezepts ein" required>
+    </div>
+
+    <!-- Zutaten hinzufügen -->
+    <div class="form-section">
+      <label>Zutaten:</label>
+      <div id="ingredient-fields-container">
+        <div class="ingredient-fields">
+          <input type="text" name="ingredient_name[]" placeholder="Zutat" class="ingredient-input" required>
+          <input type="number" name="ingredient_amount[]" placeholder="Menge" class="ingredient-input" required>
+          <select name="ingredient_unit[]" class="ingredient-input" required>
+            <option value="g">Gramm (g)</option>
+            <option value="kg">Kilogramm (kg)</option>
+            <option value="ml">Milliliter (ml)</option>
+            <option value="l">Liter (l)</option>
+            <option value="stück">Stück</option>
+          </select>
+          <button type="button" class="add-ingredient-btn" onclick="addIngredient(this)">+</button>
+          <button type="button" class="remove-ingredient-btn" onclick="removeIngredient(this)">-</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <label for="recipe-description">Beschreibung:</label>
+      <textarea id="recipe-description" name="recipe_description" rows="4" placeholder="Beschreibe dein Rezept hier..." required></textarea>
+    </div>
+
+    <div class="form-section">
+      <label for="recipe-image">Rezeptbild (optional):</label>
+      <input type="file" id="recipe-image" accept="image/*">
+    </div>
+
+
+
+    <button type="submit" class="submit-btn">Rezept erstellen und zur Rezeptsammlung hinzufügen</button>
+  </form>
+</div>
+</body>
+</html>

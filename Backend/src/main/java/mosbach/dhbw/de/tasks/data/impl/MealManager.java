@@ -1,0 +1,122 @@
+package mosbach.dhbw.de.tasks.data.impl;
+
+import mosbach.dhbw.de.tasks.model.MealplanConv;
+import mosbach.dhbw.de.tasks.model.TimeConv;
+import mosbach.dhbw.de.tasks.model.UserConv;
+import mosbach.dhbw.de.tasks.persistence.entity.MealEntryEntity;
+import mosbach.dhbw.de.tasks.persistence.entity.RecipeEntity;
+import mosbach.dhbw.de.tasks.persistence.entity.UserEntity;
+import mosbach.dhbw.de.tasks.persistence.repo.MealEntryRepository;
+import mosbach.dhbw.de.tasks.persistence.repo.RecipeRepository;
+import mosbach.dhbw.de.tasks.persistence.repo.UserRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+@Service
+public class MealManager {
+
+    private final MealEntryRepository mealRepo;
+    private final UserRepository userRepo;
+    private final RecipeRepository recipeRepo;
+
+    public MealManager(MealEntryRepository mealRepo, UserRepository userRepo, RecipeRepository recipeRepo) {
+        this.mealRepo = mealRepo;
+        this.userRepo = userRepo;
+        this.recipeRepo = recipeRepo;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MealplanConv> readAllMeals() {
+        List<MealplanConv> out = new ArrayList<>();
+        for (MealEntryEntity e : mealRepo.findAll()) {
+            String recipeId = e.getRecipe() != null ? String.valueOf(e.getRecipe().getId()) : null;
+            out.add(new MealplanConv(
+                    Math.toIntExact(e.getId()),
+                    e.getOwner().getEmail(),
+                    e.getDay(),
+                    e.getTime(),
+                    recipeId
+            ));
+        }
+        return out;
+    }
+
+    @Transactional
+    public void saveMeals(MealplanConv meal, UserConv user) {
+        UserEntity owner = userRepo.findByEmail(user.getEmail())
+                .orElseThrow(() -> new IllegalStateException("Owner user not found in DB: " + user.getEmail()));
+
+        // Upsert pro Slot (owner+day+time)
+        MealEntryEntity entry = mealRepo
+                .findByOwner_EmailAndDayAndTime(owner.getEmail(), meal.getDay(), meal.getTime())
+                .orElseGet(MealEntryEntity::new);
+
+        entry.setOwner(owner);
+        entry.setDay(meal.getDay());
+        entry.setTime(meal.getTime());
+
+        // Important: a user may only reference their own recipes in their mealplan
+        RecipeEntity recipe = null;
+        if (meal.getId() != null && !meal.getId().isBlank()) {
+            try {
+                long rid = Long.parseLong(meal.getId());
+                recipe = recipeRepo.findByIdAndOwner_Email(rid, owner.getEmail())
+                        .orElseThrow(() -> new IllegalArgumentException("Recipe not found or not owned"));
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Invalid recipe id");
+            }
+        }
+
+        entry.setRecipe(recipe);
+
+        MealEntryEntity saved = mealRepo.save(entry);
+
+        // Conv zurück-aktualisieren (wie vorher ID gesetzt wurde)
+        meal.setMealId(Math.toIntExact(saved.getId()));
+        meal.setOwner(owner.getEmail());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TimeConv> readTime(UserConv user) {
+        List<TimeConv> out = new ArrayList<>();
+        for (MealEntryEntity e : mealRepo.findByOwner_EmailOrderByIdAsc(user.getEmail())) {
+            out.add(new TimeConv(e.getDay(), e.getTime()));
+        }
+        return out;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> readMealPlanRecipeIds(UserConv user) {
+        List<Integer> ids = new ArrayList<>();
+        for (MealEntryEntity e : mealRepo.findByOwner_EmailOrderByIdAsc(user.getEmail())) {
+            if (e.getRecipe() == null) ids.add(null);
+            else ids.add(Math.toIntExact(e.getRecipe().getId()));
+        }
+        return ids;
+    }
+
+    @Transactional
+    public boolean deleteMealSlot(UserConv user, String day, String time) {
+        if (user == null || user.getEmail() == null) return false;
+        if (day == null || day.isBlank() || time == null || time.isBlank()) return false;
+        return mealRepo.deleteByOwner_EmailAndDayAndTime(user.getEmail(), day, time) > 0;
+    }
+
+    @Transactional
+    public void deleteMealsByRecipe(UserConv user, long recipeId) {
+        if (user == null || user.getEmail() == null) return;
+        mealRepo.deleteByOwner_EmailAndRecipe_Id(user.getEmail(), recipeId);
+    }
+
+    @Transactional
+    public void deleteMealsByUserEmail(String email) {
+        if (email == null || email.isBlank()) return;
+        mealRepo.deleteByOwner_Email(email);
+    }
+}

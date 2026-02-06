@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mosbach Task Organizer</title>
+</head>
+
+<body>
+
+<h1>Javascript DOM</h1>
+
+<script>
+    function sortShoppingList(choice) {
+        var ul = document.getElementById("shoppinglist");
+        // debugger;
+        // console.log("You have chosen : " + choice);
+        if (choice == 1) {
+            ul.innerHTML = "<li>bread, 1,69 Euro</li><li>cheese, 1,79 Euro</li><li>water, 0,50 Euro</li>";
+        }
+        else {
+            ul.innerHTML = "<li>water, 0,50 Euro</li><li>bread, 1,69 Euro</li><li>cheese, 1,79 Euro</li>";
+        }
+    }
+</script>
+
+I have to buy the following things.
+<ul id="shoppinglist">
+    <li>bread, 1,69 Euro</li>
+    <li>cheese, 1,79 Euro</li>
+    <li>water, 0,50 Euro</li>
+</ul>
+<button onclick="sortShoppingList(1)">Sort list by name</button> &nbsp;&nbsp;
+<button onclick="sortShoppingList(2)">Sort list by price</button>
+
+
+
+</body>
+</html>

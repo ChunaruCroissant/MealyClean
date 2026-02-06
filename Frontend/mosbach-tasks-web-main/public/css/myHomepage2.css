@@ -1,0 +1,142 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f7f5;
+    margin: 0;
+}
+
+header {
+    background-color: #086A87;
+    padding: 10px 0;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar {
+    background-color: #086A87;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    flex: 1;
+}
+
+.navbar ul li {
+    display: inline;
+}
+
+.navbar ul li a {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 10px 20px;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.navbar ul li a.active {
+    color: #333;
+    background-color: #f4fbfa;
+    border-radius: 5px;
+}
+
+.navbar ul li a:hover {
+    background-color: #065f6a;
+}
+
+.homepage-container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    padding-top: 100px;
+}
+
+.logo-container {
+    width: 30%;
+    text-align: center;
+}
+
+.logo {
+    width: 100%;
+    height: auto;
+}
+
+.content-container {
+    width: 70%;
+    padding-left: 30px;
+}
+
+.welcome-message h1 {
+    font-size: 2em;
+    color: #0295A9;
+    margin-bottom: 0;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2)
+}
+
+.content h2 {
+    text-align: center;
+}
+
+.intro-text p {
+    color: #0295A9;
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.action-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.action-description {
+    color: #0295A9;
+    font-size: 14px;
+    margin-bottom: 5px;
+    max-width: 180px;
+    text-align: center;
+}
+
+.action-btn {
+    padding: 20px 30px;
+    background-color: #0295A9;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 180px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    text-align: center;
+}
+
+.action-btn:hover {
+    background-color: #055f6a;
+}

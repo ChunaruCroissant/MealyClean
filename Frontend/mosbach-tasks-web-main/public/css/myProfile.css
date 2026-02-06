@@ -1,0 +1,115 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f7f5;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+}
+header {
+    background-color: #086A87;
+    padding: 10px 0;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+
+.navbar {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    flex: 1;
+}
+
+.navbar ul li {
+    margin: 0 15px;
+}
+
+.navbar ul li a {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 10px 20px;
+}
+
+.navbar ul li a.active {
+    color: #333;
+    background-color: #f4fbfa;
+    border-radius: 5px;
+}
+
+.navbar ul li a:hover {
+    background-color: #065f6a;
+}
+.profile-box {
+    background-color: white;
+    border-radius: 10px;
+    padding: 40px;
+    width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.logo img {
+    width: 100px;
+    margin-bottom: 10px;
+}
+
+.profile-title {
+    font-size: 24px;
+    color: #086A87;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.input-box {
+    margin-bottom: 20px;
+}
+
+.input-field {
+    width: 280px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.input-submit .submit-btn {
+    background-color: #086A87;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.input-submit .submit-btn:hover {
+    background-color: #065f6a;
+}
+
+.action-container {
+    margin-top: 30px;
+}
+
+footer {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 12px;
+    color: #666;
+}

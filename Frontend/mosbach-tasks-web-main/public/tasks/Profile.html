@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - Mealy</title>
+    <link rel="stylesheet" href="../css/myProfile.css">
+    <link rel="icon" href="../Logo/Mealy-Favicon.ico">
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/Profile.js"></script>
+</head>
+<body>
+<header>
+    <nav class="navbar">
+        <ul>
+            <li><a href="Hompage2.html">HOME</a></li>
+            <li><a href="RecipeCollection.html">REZEPTSAMMLUNG</a></li>
+            <li><a href="Mealplan.html">MEALPLAN</a></li>
+            <li><a href="Profile.html" class="active">PROFIL</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="profile-box">
+    <div class="logo">
+        <img src="../Logo/Mealy-Logo1.png" alt="Mealy Logo">
+    </div>
+
+    <div class="profile-title">
+        Mein Profil
+    </div>
+
+    <div class="input-box">
+        <input type="text" id="userName" class="input-field" placeholder="Nutzername" required autocomplete="userName">
+    </div>
+    <div class="input-box">
+        <input type="email" id="useremail" class="input-field" placeholder="E-Mail-Adresse" required autocomplete="email">
+    </div>
+    <div class="input-box">
+        <input type="password" id="newPassword" class="input-field" placeholder="Neues Passwort festlegen" autocomplete="new-password">
+    </div>
+    <div class="input-box">
+        <input type="password" id="confirmPassword" class="input-field" placeholder="Passwort wiederholen" autocomplete="new-password">
+    </div>
+    <div class="input-submit">
+        <button class="submit-btn" onclick="saveProfile()">Profil speichern</button>
+    </div>
+
+    <div class="action-container">
+        <button class="submit-btn" id="deleteAccount">Account löschen</button>
+        <button class="submit-btn" id="logOut">Abmelden</button>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2024 Mealy. Alle Rechte vorbehalten.</p>
+</footer>
+
+</body>
+</html>

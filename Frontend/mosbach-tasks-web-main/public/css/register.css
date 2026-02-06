@@ -1,0 +1,74 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f7f5; /* Helles Türkis für Hintergrund */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.registration-box {
+    width: 320px;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.logo img {
+    width: 60px; /* Größe des Logos */
+    margin-bottom: 20px;
+}
+
+.registration-header header {
+    font-size: 24px;
+    color: #086A87;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.input-type .input-field, .input-box .input-field {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #c4e4df;
+    border-radius: 5px;
+    outline: none;
+    background-color: #f4fbfa;
+}
+
+.input-type .input-field:focus, .input-box .input-field:focus {
+    border-color: #00a896;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #086A87;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.action-btn:hover {
+    background-color: #065b68;
+}
+
+.login-link p {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.login-link a {
+    color: #086A87;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
