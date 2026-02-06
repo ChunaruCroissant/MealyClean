@@ -4,6 +4,7 @@ import mosbach.dhbw.de.tasks.data.impl.*;
 import mosbach.dhbw.de.tasks.model.*;
 import mosbach.dhbw.de.tasks.data.basis.User;
 import mosbach.dhbw.de.tasks.persistence.entity.UserEntity;
+import mosbach.dhbw.de.tasks.service.EmailService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,13 +25,15 @@ public class MappingController {
     private final RecipeManager recipeManager;
     private final UserManager userManger;
     private final MealManager mealManager;
+    private final EmailService emailService;
 
     MealPlanConverter mealPlanConverter = MealPlanConverter.getMealPlanConverter();
 
-    public MappingController(RecipeManager recipeManager, UserManager userManger, MealManager mealManager) {
+    public MappingController(RecipeManager recipeManager, UserManager userManger, MealManager mealManager, EmailService emailService) {
         this.recipeManager = recipeManager;
         this.userManger = userManger;
         this.mealManager = mealManager;
+        this.emailService = emailService;
     }
 
     private String extractToken(String tokenHeader, String authorizationHeader) {
@@ -242,7 +245,7 @@ public class MappingController {
         }
 
         UserConv user = userManger.TokenToUser(token);
-        RecipeConv r = recipeManager.readRecipeByIdForOwner(id, user);
+        LargeRecipeConv r = recipeManager.readRecipeDetailByIdForOwner(id, user);
         if (r == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Recipe not found"));
         }
@@ -397,7 +400,19 @@ public class MappingController {
         }
 
         try {
-            mealManager.saveMeals(recipe, userManger.TokenToUser(token));
+            UserConv user = userManger.TokenToUser(token);
+            mealManager.saveMeals(recipe, user);
+
+            // Best-effort admin mail notification (disabled by default)
+            String recipeName = null;
+            try {
+                int rid = Integer.parseInt(recipe.getId());
+                RecipeConv rc = recipeManager.readRecipeByIdForOwner(rid, user);
+                recipeName = rc != null ? rc.getName() : null;
+            } catch (Exception ignore) {
+            }
+            emailService.sendAdminMealplanSaved(user != null ? user.getEmail() : null, recipe, recipeName);
+
             return ResponseEntity.ok("Recipe successfully added to meal plan");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", e.getMessage()));
@@ -447,7 +462,7 @@ public class MappingController {
 
     @GetMapping("/shared-recipes/{id}")
     public ResponseEntity<?> getSharedRecipe(@PathVariable long id) {
-        RecipeConv r = recipeManager.readSharedRecipeById(id);
+        LargeRecipeConv r = recipeManager.readSharedRecipeDetailById(id);
         if (r == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Shared recipe not found"));
         }

@@ -20,7 +20,7 @@ public class JwtService {
     private final Duration expiration;
 
     public JwtService(
-            @Value("${mealy.jwt.secret:ChangeThisInProduction_UseAtLeast32CharsLongSecretKey!}") String secret,
+            @Value("${mealy.jwt.secret:}") String secret,
             @Value("${mealy.jwt.expirationMinutes:10080}") long expirationMinutes
     ) {
         if (secret == null || secret.isBlank()) {

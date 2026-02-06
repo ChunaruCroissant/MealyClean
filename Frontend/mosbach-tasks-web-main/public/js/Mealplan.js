@@ -1,6 +1,6 @@
 // Mealplan.js
-// Backend stores: day + time(meal label) + recipe id.
-// Nutrition values are kept locally (Phase 3 frontend, option B).
+// Backend stores: day (YYYY-MM-DD) + time (HH:mm) + recipe id.
+// GET /mealplan returns { meals: [{ name, day, time, calories, protein, carbs, fats }] } (as JSON string).
 
 $(document).ready(function () {
   if (!window.AUTH.requireAuth()) return;
@@ -9,61 +9,23 @@ $(document).ready(function () {
   const apiMealplan = `${API}/mealplan`;
   const apiCollection = `${API}/collection`;
 
-  const NUTRI_KEY = "mealy_mealplan_nutrition_v1"; // slotKey -> {recipeId, recipeName, calories, protein, carbs, fats}
-
   const $mealForm = $("#mealForm");
-  const $selectedDate = $("#selectedDate");
   const $mealAddForm = $("#mealAddForm");
+  const $mealDate = $("#mealDate");
   const $mealTime = $("#mealTime");
   const $mealSelect = $("#meal");
-  const $calories = $("#calories");
-  const $protein = $("#protein");
-  const $carbs = $("#carbs");
-  const $fats = $("#fats");
-
-  let lastClickedDay = null;
 
   // ----------------------------
-  // Local nutrition storage
+  // Helpers
   // ----------------------------
-  function loadNutriMap() {
-    try {
-      return JSON.parse(localStorage.getItem(NUTRI_KEY) || "{}") || {};
-    } catch {
-      return {};
-    }
-  }
-
-  function saveNutriMap(map) {
-    try {
-      localStorage.setItem(NUTRI_KEY, JSON.stringify(map || {}));
-    } catch (e) {
-      console.warn("Could not persist nutrition map:", e);
-    }
-  }
-
-  function slotKey(day, time) {
-    return `${day}||${time}`;
-  }
-
-  function getNutri(day, time) {
-    const map = loadNutriMap();
-    return map[slotKey(day, time)] || null;
-  }
-
-  function setNutri(day, time, nutri) {
-    const map = loadNutriMap();
-    map[slotKey(day, time)] = nutri;
-    saveNutriMap(map);
-  }
-
-  function deleteNutri(day, time) {
-    const map = loadNutriMap();
-    const k = slotKey(day, time);
-    if (map[k]) {
-      delete map[k];
-      saveNutriMap(map);
-    }
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   function numOrZero(v) {
@@ -72,47 +34,66 @@ $(document).ready(function () {
     return Number.isFinite(n) ? n : 0;
   }
 
-  // ----------------------------
-  // UI helpers
-  // ----------------------------
-  function resetForm() {
-    $mealTime.val("");
-    $mealSelect.val("");
-    $calories.val("");
-    $protein.val("");
-    $carbs.val("");
-    $fats.val("");
-  }
-
-  function buildTitle(timeLabel, recipeName, nutri) {
-    const base = `${timeLabel}: ${recipeName}`;
-    const kcal = nutri ? numOrZero(nutri.calories) : 0;
+  function buildTitle(time, recipeName, calories) {
+    const base = `${time}: ${recipeName}`;
+    const kcal = numOrZero(calories);
     return kcal > 0 ? `${base} (${kcal} kcal)` : base;
   }
 
-  function upsertEvent(calendar, day, timeLabel, recipeName, nutri) {
-    // one event per slot (day+timeLabel)
+  function isoStart(day, time) {
+    // expects day=YYYY-MM-DD, time=HH:mm
+    if (!day || !time) return null;
+    return `${day}T${time}:00`;
+  }
+
+  function addMinutesToIso(iso, minutes) {
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return null;
+      d.setMinutes(d.getMinutes() + minutes);
+      return d.toISOString();
+    } catch {
+      return null;
+    }
+  }
+
+  function upsertEvent(calendar, meal) {
+    const day = meal.day;
+    const time = meal.time;
+    const recipeName = meal.name || "";
+    const startIso = isoStart(day, time);
+    if (!startIso) return;
+
+    // one event per slot (day+time)
     calendar.getEvents().forEach((ev) => {
-      if (ev.extendedProps?.slotDay === day && ev.extendedProps?.slotTime === timeLabel) {
+      if (ev.extendedProps?.slotDay === day && ev.extendedProps?.slotTime === time) {
         ev.remove();
       }
     });
 
+    const endIso = addMinutesToIso(startIso, 30); // visual duration
+
     calendar.addEvent({
-      title: buildTitle(timeLabel, recipeName, nutri),
-      start: day,
-      allDay: true,
+      title: buildTitle(time, recipeName, meal.calories),
+      start: startIso,
+      end: endIso || undefined,
+      allDay: false,
       extendedProps: {
         slotDay: day,
-        slotTime: timeLabel,
+        slotTime: time,
         recipeName: recipeName,
-        recipeId: nutri?.recipeId ?? null,
-        calories: nutri ? numOrZero(nutri.calories) : 0,
-        protein: nutri ? numOrZero(nutri.protein) : 0,
-        carbs: nutri ? numOrZero(nutri.carbs) : 0,
-        fats: nutri ? numOrZero(nutri.fats) : 0,
+        calories: numOrZero(meal.calories),
+        protein: numOrZero(meal.protein),
+        carbs: numOrZero(meal.carbs),
+        fats: numOrZero(meal.fats),
       },
     });
+  }
+
+  function resetForm() {
+    $mealTime.val("");
+    $mealSelect.val("");
+    // keep date, because user may add multiple slots for same day
   }
 
   // ----------------------------
@@ -132,21 +113,22 @@ $(document).ready(function () {
     events: [],
 
     dateClick: function (info) {
-      lastClickedDay = info.dateStr;
-      $selectedDate.text(info.dateStr);
+      $mealDate.val(info.dateStr);
+      if (!$mealTime.val()) $mealTime.val("12:00");
       $mealForm.show();
     },
 
     eventClick: function (info) {
       const day = info.event.extendedProps?.slotDay;
-      const timeLabel = info.event.extendedProps?.slotTime;
+      const time = info.event.extendedProps?.slotTime;
+      const recipeName = info.event.extendedProps?.recipeName || info.event.title;
 
-      if (!day || !timeLabel) return;
+      if (!day || !time) return;
 
       const details = [
         `Datum: ${day}`,
-        `Mahlzeit: ${timeLabel}`,
-        `Rezept: ${info.event.extendedProps?.recipeName || info.event.title}`,
+        `Uhrzeit: ${time}`,
+        `Rezept: ${recipeName}`,
         `Kalorien: ${info.event.extendedProps?.calories || 0}`,
         `Protein: ${info.event.extendedProps?.protein || 0} g`,
         `Kohlenhydrate: ${info.event.extendedProps?.carbs || 0} g`,
@@ -158,17 +140,13 @@ $(document).ready(function () {
 
       // Optimistic UI
       info.event.remove();
-      deleteNutri(day, timeLabel);
 
       $.ajax({
         url: apiMealplan,
         type: "DELETE",
         headers: window.AUTH.authHeaders({ "Content-Type": "application/json" }),
-        data: JSON.stringify({ day: day, time: timeLabel }),
+        data: JSON.stringify({ day: day, time: time }),
         contentType: "application/json",
-        success: function () {
-          // ok
-        },
         error: function (xhr) {
           console.error("DELETE /mealplan failed", xhr.status, xhr.responseText);
           const msg = xhr.responseJSON?.reason || xhr.responseText || "Unbekannter Fehler";
@@ -200,7 +178,6 @@ $(document).ready(function () {
 
         entries.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
-        // Reset select
         $mealSelect.empty();
         $mealSelect.append('<option value="" disabled selected>Wähle ein Rezept</option>');
 
@@ -223,18 +200,17 @@ $(document).ready(function () {
   $mealAddForm.on("submit", function (e) {
     e.preventDefault();
 
-    const day = lastClickedDay;
-    if (!day) {
-      alert("Bitte zuerst ein Datum im Kalender anklicken.");
-      return;
-    }
-
-    const timeLabel = ($mealTime.val() || "").trim();
+    const day = ($mealDate.val() || "").trim();
+    const time = ($mealTime.val() || "").trim();
     const recipeId = $mealSelect.val();
     const recipeName = $mealSelect.find("option:selected").text() || "";
 
-    if (!timeLabel) {
-      alert("Bitte eine Mahlzeit-Zeit angeben (z.B. Frühstück)." );
+    if (!day) {
+      alert("Bitte ein Datum auswählen.");
+      return;
+    }
+    if (!time) {
+      alert("Bitte eine Uhrzeit angeben.");
       return;
     }
     if (!recipeId) {
@@ -242,30 +218,14 @@ $(document).ready(function () {
       return;
     }
 
-    const nutri = {
-      recipeId: String(recipeId),
-      recipeName: recipeName,
-      calories: numOrZero($calories.val()),
-      protein: numOrZero($protein.val()),
-      carbs: numOrZero($carbs.val()),
-      fats: numOrZero($fats.val()),
-    };
-
-    // Save backend (upsert)
     $.ajax({
       url: apiMealplan,
       type: "POST",
       headers: window.AUTH.authHeaders({ "Content-Type": "application/json" }),
-      data: JSON.stringify({ day: day, time: timeLabel, id: String(recipeId) }),
+      data: JSON.stringify({ day: day, time: time, id: String(recipeId) }),
       contentType: "application/json",
       success: function () {
-        // Store nutrition locally (option B)
-        setNutri(day, timeLabel, nutri);
-
-        // Upsert calendar event
-        upsertEvent(calendar, day, timeLabel, recipeName, nutri);
-
-        // Done
+        upsertEvent(calendar, { day, time, name: recipeName });
         $mealForm.hide();
         resetForm();
       },
@@ -286,7 +246,7 @@ $(document).ready(function () {
       type: "GET",
       headers: window.AUTH.authHeaders(),
       success: function (response) {
-        // Backend currently returns a JSON string (MealPlanConverter). Handle both.
+        // Backend returns a JSON string. Handle both.
         if (typeof response === "string") {
           try {
             response = JSON.parse(response);
@@ -303,26 +263,7 @@ $(document).ready(function () {
           return;
         }
 
-        meals.forEach((m) => {
-          const day = m.day;
-          const timeLabel = m.time;
-          const recipeName = m.name;
-
-          if (!day || !timeLabel) return;
-
-          // overlay local nutrition (option B)
-          const localNutri = getNutri(day, timeLabel);
-          const nutri = localNutri || {
-            recipeId: null,
-            recipeName: recipeName,
-            calories: numOrZero(m.calories),
-            protein: numOrZero(m.protein),
-            carbs: numOrZero(m.carbs),
-            fats: numOrZero(m.fats),
-          };
-
-          upsertEvent(calendar, day, timeLabel, recipeName, nutri);
-        });
+        meals.forEach((m) => upsertEvent(calendar, m));
       },
       error: function (xhr) {
         console.error("GET /mealplan failed", xhr.status, xhr.responseText);
@@ -330,19 +271,6 @@ $(document).ready(function () {
         alert("Fehler beim Laden der Mahlzeiten: " + msg);
       },
     });
-  }
-
-  // ----------------------------
-  // Helpers
-  // ----------------------------
-  function escapeHtml(str) {
-    if (str === null || str === undefined) return "";
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\"/g, "&quot;")
-      .replace(/'/g, "&#039;");
   }
 
   // init

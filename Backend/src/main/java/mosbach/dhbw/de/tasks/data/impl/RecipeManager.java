@@ -166,6 +166,39 @@ public class RecipeManager {
         return new RecipeConv(Math.toIntExact(r.getId()), r.getName(), ingredients, r.getDescription());
     }
 
+
+    @Transactional(readOnly = true)
+    public LargeRecipeConv readRecipeDetailByIdForOwner(int recipeId, UserConv user) {
+        if (user == null || user.getEmail() == null) return null;
+
+        RecipeEntity r = recipeRepo.findByIdAndOwner_Email((long) recipeId, user.getEmail()).orElse(null);
+        if (r == null) return null;
+
+        List<IngredientConv> ingredients = new ArrayList<>();
+        if (r.getIngredients() != null) {
+            for (IngredientValue v : r.getIngredients()) {
+                ingredients.add(new IngredientConv(v.getName(), v.getUnit(), v.getAmount()));
+            }
+        }
+
+        return new LargeRecipeConv(
+                Math.toIntExact(r.getId()),
+                r.getName(),
+                r.getOwner() != null ? r.getOwner().getEmail() : null,
+                ingredients,
+                r.getDescription(),
+                safe0(r.getCaloriesKcal()),
+                safe0(r.getTotalFatG()),
+                safe0(r.getSaturatedFatG()),
+                safe0(r.getCholesterolMg()),
+                safe0(r.getSodiumMg()),
+                safe0(r.getTotalCarbohydratesG()),
+                safe0(r.getDietaryFiberG()),
+                safe0(r.getSugarsG()),
+                safe0(r.getProteinG())
+        );
+    }
+
     @Transactional
     public boolean deleteRecipeOwned(long recipeId, UserConv user) {
         if (user == null || user.getEmail() == null) return false;
@@ -211,6 +244,37 @@ public class RecipeManager {
             }
         }
         return new RecipeConv(Math.toIntExact(r.getId()), r.getName(), ingredients, r.getDescription());
+    }
+
+
+    @Transactional(readOnly = true)
+    public LargeRecipeConv readSharedRecipeDetailById(long recipeId) {
+        RecipeEntity r = recipeRepo.findByIdAndSharedTrue(recipeId).orElse(null);
+        if (r == null) return null;
+
+        List<IngredientConv> ingredients = new ArrayList<>();
+        if (r.getIngredients() != null) {
+            for (IngredientValue v : r.getIngredients()) {
+                ingredients.add(new IngredientConv(v.getName(), v.getUnit(), v.getAmount()));
+            }
+        }
+
+        return new LargeRecipeConv(
+                Math.toIntExact(r.getId()),
+                r.getName(),
+                r.getOwner() != null ? r.getOwner().getEmail() : null,
+                ingredients,
+                r.getDescription(),
+                safe0(r.getCaloriesKcal()),
+                safe0(r.getTotalFatG()),
+                safe0(r.getSaturatedFatG()),
+                safe0(r.getCholesterolMg()),
+                safe0(r.getSodiumMg()),
+                safe0(r.getTotalCarbohydratesG()),
+                safe0(r.getDietaryFiberG()),
+                safe0(r.getSugarsG()),
+                safe0(r.getProteinG())
+        );
     }
 
     @Transactional
@@ -331,4 +395,10 @@ public class RecipeManager {
             return null;
         }
     }
+
+
+    private static double safe0(Double v) {
+        return v != null ? v : 0.0;
+    }
+
 }

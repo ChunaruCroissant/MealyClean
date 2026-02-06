@@ -3,19 +3,23 @@
 *.iml
 out/
 
-# Java / Maven
+# Java
 **/target/
 *.log
 
-# Node / Frontend tooling (falls jemals genutzt)
-node_modules/
-dist/
-build/
+# Gradle
+**/.gradle/
+**/build/
+
+# Node
+**/node_modules/
+**/dist/
+**/build/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Env / Secrets
+# Env
 .env
 .env.*

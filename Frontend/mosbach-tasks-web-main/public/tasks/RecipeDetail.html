@@ -18,13 +18,23 @@
 
     <img id="recipe-image" alt="Rezeptbild" style="display:none;" />
 
+    <div id="nutrition-container" class="nutrition-box" style="display:none;">
+        <h3>Nährwerte</h3>
+        <div class="nutrition-grid">
+            <div class="nutrition-item"><strong>Kalorien</strong><span id="nutri-cal">-</span> kcal</div>
+            <div class="nutrition-item"><strong>Protein</strong><span id="nutri-prot">-</span> g</div>
+            <div class="nutrition-item"><strong>Kohlenhydrate</strong><span id="nutri-carb">-</span> g</div>
+            <div class="nutrition-item"><strong>Fett</strong><span id="nutri-fat">-</span> g</div>
+        </div>
+    </div>
+
     <p id="recipe-description"></p>
     <h3>Zutaten:</h3>
     <ul id="ingredient-list"></ul>
     <button id="delete-recipe-btn">Rezept löschen</button>
 </div>
 
-<a href="RecipeCollection.html" id="backToRecipes">&larr; Zurück zur Rezeptsammlung</a>
+<a href="RecipeCollection.html" id="backToRecipes" class="backToRecipes">&larr; Zurück zur Rezeptsammlung</a>
 
 
 </body>

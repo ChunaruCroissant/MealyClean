@@ -9,6 +9,12 @@ $(function () {
   const API = window.API;
   const DETAIL_URL = `${API}/recipe/detail`;
   const IMG_KEY = "mealy_recipe_images";
+  const numOrNull = (v) => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = Number(String(v).replace(",", "."));
+    return Number.isFinite(n) ? n : null;
+  };
+
 
   const id = new URLSearchParams(location.search).get("id");
   if (!id) {
@@ -49,6 +55,26 @@ $(function () {
 
     $("#recipe-name").text(r?.name || "");
     $("#recipe-description").text(r?.description || "");
+
+    // Nährwerte anzeigen (falls vorhanden)
+    const $nutri = $("#nutrition-container");
+    if ($nutri.length) {
+      const cal = numOrNull(r?.["Calories_(kcal)"] ?? r?.calories ?? r?.caloriesKcal);
+      const prot = numOrNull(r?.["Protein_(g)"] ?? r?.protein);
+      const carb = numOrNull(r?.["Total_Carbohydrates_(g)"] ?? r?.carbs);
+      const fat = numOrNull(r?.["Total_Fat_(g)"] ?? r?.fats ?? r?.fat);
+
+      const hasAny = [cal, prot, carb, fat].some((x) => x !== null && x > 0);
+      if (hasAny) {
+        $("#nutri-cal").text(cal ?? "-");
+        $("#nutri-prot").text(prot ?? "-");
+        $("#nutri-carb").text(carb ?? "-");
+        $("#nutri-fat").text(fat ?? "-");
+        $nutri.show();
+      } else {
+        $nutri.hide();
+      }
+    }
 
     // Bild anzeigen (nur wenn <img id="recipe-image"> existiert)
     const $img = $("#recipe-image");

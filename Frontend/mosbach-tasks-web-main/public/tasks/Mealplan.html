@@ -35,27 +35,18 @@
 </div>
   <div id="mealForm" class="meal-form" style="display:none;">
     <h2>Neue Mahlzeit hinzufügen</h2>
-    <p class="selected-date">Ausgewähltes Datum: <span id="selectedDate">-</span></p>
-    <form id="mealAddForm">
-      <label for="mealTime">Zeit der Mahlzeit:</label>
-      <input type="text" id="mealTime" placeholder="Z.B. Frühstück" required>
-      <label for="meal">Mahlzeit:</label>
+<form id="mealAddForm">
+      <label for="mealDate">Datum:</label>
+      <input type="date" id="mealDate" required>
+
+      <label for="mealTime">Uhrzeit:</label>
+      <input type="time" id="mealTime" required>
+
+      <label for="meal">Rezept:</label>
 
       <select id="meal" required>
         <option value="" disabled selected>Wähle ein Rezept</option>
       </select>
-
-      <label for="calories">Kalorien:</label>
-      <input type="number" id="calories" placeholder="Z.B. 200 (optional)">
-
-      <label for="protein">Protein (g):</label>
-      <input type="number" id="protein" placeholder="Z.B. 10 (optional)">
-
-      <label for="carbs">Kohlenhydrate (g):</label>
-      <input type="number" id="carbs" placeholder="Z.B. 30 (optional)">
-
-      <label for="fats">Fette (g):</label>
-      <input type="number" id="fats" placeholder="Z.B. 5 (optional)">
 
       <button type="submit" class="submit-btn">Mahlzeit hinzufügen</button>
     </form>

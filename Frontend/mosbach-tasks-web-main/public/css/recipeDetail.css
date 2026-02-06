@@ -96,3 +96,34 @@ footer {
     color: #666;
     padding: 20px;
 }
+
+
+/* Nutrition box */
+.nutrition-box {
+    width: 100%;
+    background-color: #f4fbfa;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0 20px 0;
+}
+
+.nutrition-box h3 {
+    margin: 0 0 10px 0;
+    color: #0295A9;
+    text-align: center;
+}
+
+.nutrition-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.nutrition-item {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
