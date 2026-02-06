@@ -15,7 +15,6 @@ $(function () {
     return Number.isFinite(n) ? n : null;
   };
 
-
   const id = new URLSearchParams(location.search).get("id");
   if (!id) {
     alert("Rezept-ID nicht gefunden.");
@@ -56,7 +55,6 @@ $(function () {
     $("#recipe-name").text(r?.name || "");
     $("#recipe-description").text(r?.description || "");
 
-    // Nährwerte anzeigen (falls vorhanden)
     const $nutri = $("#nutrition-container");
     if ($nutri.length) {
       const cal = numOrNull(r?.["Calories_(kcal)"] ?? r?.calories ?? r?.caloriesKcal);
@@ -76,18 +74,10 @@ $(function () {
       }
     }
 
-    // Bild anzeigen (nur wenn <img id="recipe-image"> existiert)
     const $img = $("#recipe-image");
     if ($img.length) {
       const map = loadImages();
-
-      // Primär: nach Name (Recipe.js speichert unter Name)
-      // Fallbacks: nach ID (falls du später umstellst)
-      const imgData =
-        (r && map[String(r.id)]) ||
-        map[String(id)] ||
-        (r && map[r.name]) ||
-        null;
+      const imgData = (r && map[String(r.id)]) || map[String(id)] || (r && map[r.name]) || null;
 
       if (imgData) {
         $img.attr({ src: imgData, alt: r?.name || "Rezeptbild" }).show();
@@ -98,9 +88,7 @@ $(function () {
 
     $("#ingredient-list").empty();
     (r?.ingredients || []).forEach((i) => {
-      $("#ingredient-list").append(
-        `<li>${i.name} (${i.amount} ${i.unit})</li>`
-      );
+      $("#ingredient-list").append(`<li>${i.name} (${i.amount} ${i.unit})</li>`);
     });
   };
 
@@ -128,15 +116,54 @@ $(function () {
       type: "DELETE",
       headers: window.AUTH.authHeaders(),
       success: () => {
-        // Optional: lokales Bild entfernen
         removeImageByName(currentRecipeName);
-
         alert("Rezept gelöscht!");
         location.href = "RecipeCollection.html";
       },
       error: (xhr) => {
         console.error("DELETE Fehler:", xhr.status, xhr.responseText);
         alert(`Löschen fehlgeschlagen (${xhr.status}).`);
+      },
+    });
+  });
+
+  // --- SHARE / UNSHARE Recipe ---
+  const SHARE_URL = `${API}/recipe/${encodeURIComponent(id)}/share`;
+
+  $("#share-recipe-btn").on("click", (e) => {
+    e.preventDefault();
+
+    $.ajax({
+      url: SHARE_URL,
+      type: "POST",
+      headers: window.AUTH.authHeaders(),
+      success: () => {
+        alert("Rezept wurde mit der Community geteilt.");
+        $("#share-recipe-btn").hide();
+        $("#unshare-recipe-btn").show();
+      },
+      error: (xhr) => {
+        console.error("SHARE Fehler:", xhr.status, xhr.responseText);
+        alert(`Teilen fehlgeschlagen (${xhr.status}).`);
+      },
+    });
+  });
+
+  $("#unshare-recipe-btn").on("click", (e) => {
+    e.preventDefault();
+
+    $.ajax({
+      url: SHARE_URL,
+      type: "DELETE",
+      headers: window.AUTH.authHeaders(),
+      success: () => {
+        alert("Rezept wurde nicht mehr geteilt.");
+        $("#unshare-recipe-btn").hide();
+        $("#share-recipe-btn").show();
+      },
+      error: (xhr) => {
+        console.error("UNSHARE Fehler:", xhr.status, xhr.responseText);
+        alert(`Entteilen fehlgeschlagen (${xhr.status}).`);
       },
     });
   });
