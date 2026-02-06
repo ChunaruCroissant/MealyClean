@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import mosbach.dhbw.de.tasks.model.*;
 import mosbach.dhbw.de.tasks.persistence.entity.IngredientValue;
 import mosbach.dhbw.de.tasks.persistence.entity.RecipeEntity;
+import mosbach.dhbw.de.tasks.persistence.entity.RecipeRatingEntity;
 import mosbach.dhbw.de.tasks.persistence.entity.UserEntity;
+import mosbach.dhbw.de.tasks.persistence.repo.RatingSummaryProjection;
+import mosbach.dhbw.de.tasks.persistence.repo.RecipeRatingRepository;
 import mosbach.dhbw.de.tasks.persistence.repo.RecipeRepository;
 import mosbach.dhbw.de.tasks.persistence.repo.UserRepository;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ public class RecipeManager {
 
     private final RecipeRepository recipeRepo;
     private final UserRepository userRepo;
+    private final RecipeRatingRepository ratingRepo;
 
     // Nutrition API settings (override via ENV/properties)
     @Value("${mealy.nutrition.api.url:https://gustar-io-deutsche-rezepte.p.rapidapi.com/nutrition}")
@@ -35,9 +39,10 @@ public class RecipeManager {
     private String nutritionApiHost;
 
 
-    public RecipeManager(RecipeRepository recipeRepo, UserRepository userRepo) {
+    public RecipeManager(RecipeRepository recipeRepo, UserRepository userRepo, RecipeRatingRepository ratingRepo) {
         this.recipeRepo = recipeRepo;
         this.userRepo = userRepo;
+        this.ratingRepo = ratingRepo;
     }
 
     @Transactional
@@ -220,13 +225,30 @@ public class RecipeManager {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> listSharedRecipes() {
+        List<RecipeEntity> shared = recipeRepo.findBySharedTrueOrderByIdAsc();
+        List<Long> ids = shared.stream().map(RecipeEntity::getId).toList();
+
+        Map<Long, RatingSummaryProjection> summaryById = new HashMap<>();
+        if (!ids.isEmpty()) {
+            for (RatingSummaryProjection s : ratingRepo.findSummariesByRecipeIds(ids)) {
+                summaryById.put(s.getRecipeId(), s);
+            }
+        }
+
         List<Map<String, Object>> out = new ArrayList<>();
-        for (RecipeEntity r : recipeRepo.findBySharedTrueOrderByIdAsc()) {
+        for (RecipeEntity r : shared) {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("id", r.getId());
             row.put("name", r.getName());
             // owner is useful for UI/debugging; you can remove later
             row.put("owner", r.getOwner() != null ? r.getOwner().getEmail() : null);
+
+            RatingSummaryProjection s = summaryById.get(r.getId());
+            double avg = (s != null && s.getAvgStars() != null) ? round1(s.getAvgStars()) : 0.0;
+            long cnt = (s != null && s.getRatingCount() != null) ? s.getRatingCount() : 0L;
+            row.put("avgRating", avg);
+            row.put("ratingCount", cnt);
+
             out.add(row);
         }
         return out;
@@ -277,7 +299,82 @@ public class RecipeManager {
         );
     }
 
+    
+
+    // ===========================
+    // Ratings (Shared Recipes)
+    // ===========================
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getSharedRecipeRatings(long recipeId) {
+        RecipeEntity recipe = recipeRepo.findByIdAndSharedTrue(recipeId).orElse(null);
+        if (recipe == null) return null;
+
+        Double avgD = ratingRepo.findAverageByRecipeId(recipeId);
+        Long cntL = ratingRepo.countByRecipeId(recipeId);
+
+        double avg = avgD != null ? round1(avgD) : 0.0;
+        long cnt = cntL != null ? cntL : 0L;
+
+        List<Map<String, Object>> ratings = new ArrayList<>();
+        for (RecipeRatingEntity rr : ratingRepo.findTop20ByRecipe_IdOrderByUpdatedAtDesc(recipeId)) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("stars", rr.getStars());
+            row.put("comment", rr.getComment());
+            row.put("userName", rr.getRater() != null ? rr.getRater().getUserName() : null);
+            row.put("date", rr.getUpdatedAt() != null ? rr.getUpdatedAt().toString() : null);
+            ratings.add(row);
+        }
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("recipeId", recipeId);
+        out.put("avgRating", avg);
+        out.put("ratingCount", cnt);
+        out.put("ratings", ratings);
+        return out;
+    }
+
     @Transactional
+    public boolean rateSharedRecipe(long recipeId, UserConv user, RecipeRatingCreateConv rating) {
+        RecipeEntity recipe = recipeRepo.findByIdAndSharedTrue(recipeId).orElse(null);
+        if (recipe == null) return false;
+
+        if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Missing user email");
+        }
+
+        UserEntity rater = userRepo.findByEmail(user.getEmail())
+                .orElseThrow(() -> new IllegalStateException("Rater user not found in DB: " + user.getEmail()));
+
+        int stars = (rating != null && rating.getStars() != null) ? rating.getStars() : 0;
+        if (stars < 1 || stars > 5) {
+            throw new IllegalArgumentException("Stars must be between 1 and 5");
+        }
+
+        String comment = rating != null ? rating.getComment() : null;
+        if (comment != null) {
+            comment = comment.trim();
+            if (comment.length() > 2000) comment = comment.substring(0, 2000);
+            if (comment.isBlank()) comment = null;
+        }
+
+        RecipeRatingEntity e = ratingRepo.findByRecipe_IdAndRater_Id(recipeId, rater.getId())
+                .orElseGet(RecipeRatingEntity::new);
+
+        e.setRecipe(recipe);
+        e.setRater(rater);
+        e.setStars(stars);
+        e.setComment(comment);
+
+        ratingRepo.save(e);
+        return true;
+    }
+
+    private double round1(double v) {
+        return Math.round(v * 10.0) / 10.0;
+    }
+
+@Transactional
     public long deleteRecipesByUserEmail(String email) {
         if (email == null || email.isBlank()) return 0;
         return recipeRepo.deleteByOwner_Email(email);

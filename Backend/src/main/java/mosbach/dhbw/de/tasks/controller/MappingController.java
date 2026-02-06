@@ -205,7 +205,15 @@ public class MappingController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong token"));
         }
 
-        recipeManager.saveRecipe(recipe, userManger.TokenToUser(token));
+        UserConv user = userManger.TokenToUser(token);
+        recipeManager.saveRecipe(recipe, user);
+
+        // Best-effort user notification (disabled by default)
+        try {
+            emailService.sendRecipeCreated(user != null ? user.getEmail() : null, recipe != null ? recipe.getName() : null);
+        } catch (Exception ignore) {
+        }
+
         return ResponseEntity.ok("Recipe successfully created");
     }
 
@@ -398,16 +406,6 @@ public class MappingController {
             UserConv user = userManger.TokenToUser(token);
             mealManager.saveMeals(recipe, user);
 
-            // Best-effort admin mail notification (disabled by default)
-            String recipeName = null;
-            try {
-                int rid = Integer.parseInt(recipe.getId());
-                RecipeConv rc = recipeManager.readRecipeByIdForOwner(rid, user);
-                recipeName = rc != null ? rc.getName() : null;
-            } catch (Exception ignore) {
-            }
-            emailService.sendAdminMealplanSaved(user != null ? user.getEmail() : null, recipe, recipeName);
-
             return ResponseEntity.ok("Recipe successfully added to meal plan");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", e.getMessage()));
@@ -464,7 +462,51 @@ public class MappingController {
         return ResponseEntity.ok(r);
     }
 
-    @PostMapping("/recipe/{id}/share")
+    
+    @GetMapping("/shared-recipes/{id}/ratings")
+    public ResponseEntity<?> getSharedRecipeRatings(@PathVariable long id) {
+        Map<String, Object> out = recipeManager.getSharedRecipeRatings(id);
+        if (out == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Shared recipe not found"));
+        }
+        return ResponseEntity.ok(out);
+    }
+
+    @PostMapping(
+            path = "/shared-recipes/{id}/ratings",
+            consumes = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<?> rateSharedRecipe(
+            @PathVariable long id,
+            @RequestHeader(value = "token", required = false) String tokenHeader,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @RequestBody RecipeRatingCreateConv rating) {
+
+        String token = extractToken(tokenHeader, authorizationHeader);
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Missing token"));
+        }
+
+        TokenConv t = new TokenConv(token);
+        if (!userManger.checkToken(t)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", "Wrong Token"));
+        }
+
+        UserConv user = userManger.TokenToUser(token);
+        boolean ok;
+        try {
+            ok = recipeManager.rateSharedRecipe(id, user, rating);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("reason", e.getMessage()));
+        }
+        if (!ok) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("reason", "Shared recipe not found"));
+        }
+
+        return ResponseEntity.ok(recipeManager.getSharedRecipeRatings(id));
+    }
+
+@PostMapping("/recipe/{id}/share")
     public ResponseEntity<?> shareRecipe(
             @PathVariable long id,
             @RequestHeader(value = "token", required = false) String tokenHeader,

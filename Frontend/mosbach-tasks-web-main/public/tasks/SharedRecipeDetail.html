@@ -8,6 +8,7 @@
 
   <link rel="icon" href="../Logo/Mealy-Favicon.ico" />
   <link rel="stylesheet" href="../css/sharedRecipeDetail.css" />
+  <link rel="stylesheet" href="../css/sharedRecipes.css" />
 
   <script src="../js/jquery-3.6.0.min.js"></script>
   <script src="../js/config.js"></script>
@@ -37,11 +38,56 @@
     <h3>Zutaten:</h3>
     <ul id="ingredient-list"></ul>
 
-    <div class="footer-links">
+    
+    <div class="rating-section">
+      <h3>Bewertungen:</h3>
+
+      <div class="rating-summary">
+        <div class="rating-display">
+          <span>★</span> <span id="avgRating">0.0</span>
+          <span class="rating-count" id="ratingCount">(0)</span>
+        </div>
+
+        <button id="openRatingModal" class="rate-btn" type="button">Bewerten</button>
+      </div>
+
+      <div id="ratingList" class="rating-list"></div>
+    </div>
+
+<div class="footer-links">
       <a href="SharedRecipes.html" id="backToShared">&larr; Zurück zu Community-Rezepten</a>
     </div>
   </div>
 </main>
+
+
+<div id="ratingModal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+
+    <h2 id="modalRecipeTitle">Rezept bewerten</h2>
+    <p class="modal-subtitle">Wie hat es dir geschmeckt?</p>
+
+    <form id="ratingForm">
+      <input type="hidden" id="ratingRecipeId" name="recipe_id">
+
+      <div class="star-rating-input">
+        <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 Sterne">★</label>
+        <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 Sterne">★</label>
+        <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 Sterne">★</label>
+        <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 Sterne">★</label>
+        <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 Stern">★</label>
+      </div>
+
+      <div class="form-group">
+        <label for="ratingComment">Deine Meinung (optional):</label>
+        <textarea id="ratingComment" rows="4" placeholder="Was mochtest du besonders?"></textarea>
+      </div>
+
+      <button type="submit" class="submit-rating-btn">Bewertung absenden</button>
+    </form>
+  </div>
+</div>
 
 </body>
 </html>

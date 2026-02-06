@@ -1,6 +1,5 @@
 package mosbach.dhbw.de.tasks.service;
 
-import mosbach.dhbw.de.tasks.model.MealplanConv;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Optional best-effort admin notifications via SMTP.
+ * Optional best-effort SMTP notifications.
  * Disabled by default (mealy.mail.enabled=false).
  */
 @Service
@@ -23,54 +22,50 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final boolean enabled;
     private final String senderEmail;
-    private final String adminTo;
+    private final String overrideTo;
 
     public EmailService(
             JavaMailSender mailSender,
-            @Value("${mealy.mail.enabled:}") boolean enabled,
+            @Value("${mealy.mail.enabled:false}") boolean enabled,
             @Value("${spring.mail.username:}") String senderEmail,
-            @Value("${mealy.mail.adminTo:}") String adminTo
+            @Value("${mealy.mail.overrideTo:}") String overrideTo
     ) {
         this.mailSender = mailSender;
         this.enabled = enabled;
         this.senderEmail = senderEmail;
-        this.adminTo = adminTo;
+        this.overrideTo = overrideTo;
     }
 
     /**
-     * Best-effort notification. Never throws to controllers.
+     * Sends a confirmation to the user after creating a recipe.
+     * Best-effort: never throws to controllers.
      */
-    public void sendAdminMealplanSaved(String userEmail, MealplanConv meal, String recipeName) {
+    public void sendRecipeCreated(String userEmail, String recipeName) {
         if (!enabled) return;
-        if (adminTo == null || adminTo.isBlank()) return;
+
+        String to = (overrideTo != null && !overrideTo.isBlank()) ? overrideTo : userEmail;
+        if (to == null || to.isBlank()) return;
 
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             if (senderEmail != null && !senderEmail.isBlank()) {
                 msg.setFrom(senderEmail);
             }
-            msg.setTo(adminTo);
-            msg.setSubject("Mealy: Neue Mealplan-Eintragung");
-            msg.setText(buildBody(userEmail, meal, recipeName));
+            msg.setTo(to);
+            msg.setSubject("Mealy: Rezept erstellt");
+            msg.setText(buildRecipeCreatedBody(userEmail, recipeName));
             mailSender.send(msg);
         } catch (MailException e) {
-            LOG.log(Level.WARNING, "Mailversand fehlgeschlagen (adminTo=" + adminTo + ")", e);
+            LOG.log(Level.WARNING, "Mailversand fehlgeschlagen (to=" + to + ")", e);
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "Unerwarteter Fehler beim Mailversand (adminTo=" + adminTo + ")", e);
+            LOG.log(Level.WARNING, "Unerwarteter Fehler beim Mailversand (to=" + to + ")", e);
         }
     }
 
-    private String buildBody(String userEmail, MealplanConv meal, String recipeName) {
-        String day = meal != null && meal.getDay() != null ? meal.getDay() : "";
-        String time = meal != null && meal.getTime() != null ? meal.getTime() : "";
-        String recipeId = meal != null && meal.getId() != null ? meal.getId() : "";
-
-        return "Admin-Notification: Mealplan wurde aktualisiert.\n\n"
+    private String buildRecipeCreatedBody(String userEmail, String recipeName) {
+        return "Dein Rezept wurde erfolgreich erstellt.\n\n"
                 + "User: " + (userEmail != null ? userEmail : "") + "\n"
-                + "Datum: " + day + "\n"
-                + "Uhrzeit: " + time + "\n"
-                + "Rezept-ID: " + recipeId + "\n"
-                + "Rezept-Name: " + (recipeName != null ? recipeName : "") + "\n\n"
+                + "Rezept: " + (recipeName != null ? recipeName : "") + "\n\n"
                 + "Zeitstempel: " + Instant.now() + "\n";
     }
 }
