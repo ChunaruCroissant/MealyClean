@@ -27,7 +27,7 @@ public class EmailService {
 
     public EmailService(
             JavaMailSender mailSender,
-            @Value("${mealy.mail.enabled:false}") boolean enabled,
+            @Value("${mealy.mail.enabled:}") boolean enabled,
             @Value("${spring.mail.username:}") String senderEmail,
             @Value("${mealy.mail.adminTo:}") String adminTo
     ) {
