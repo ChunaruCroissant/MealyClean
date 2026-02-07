@@ -69,7 +69,6 @@ public class EmailService {
 
     /**
      * Sends a notification to the recipe owner when someone rated the recipe.
-     * If mealy.mail.overrideTo is set, the email will be sent there instead (useful for testing).
      */
     public void sendRecipeRated(
             String ownerEmail,
@@ -82,10 +81,11 @@ public class EmailService {
     ) {
         if (!enabled) return;
 
-        String to = (overrideTo != null && !overrideTo.isBlank())
-                ? overrideTo.trim()
-                : (ownerEmail != null ? ownerEmail.trim() : "");
-        if (to.isBlank()) return;
+        String to = ownerEmail != null ? ownerEmail.trim() : "";
+        if (to.isBlank()) {
+            LOG.log(Level.WARNING, "Mail skipped: ownerEmail is empty (sendRecipeRated)");
+            return;
+        }
 
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
