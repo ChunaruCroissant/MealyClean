@@ -167,6 +167,29 @@ h1 {
 }
 
 /* =====================================
+   FullCalendar – Events lesbar machen
+   ===================================== */
+
+/* Titel umbrechen statt abschneiden */
+.fc .fc-daygrid-event,
+.fc .fc-daygrid-event .fc-event-title,
+.fc .fc-daygrid-event .fc-event-title-container {
+    white-space: normal !important;
+}
+
+.fc .fc-daygrid-event .fc-event-title {
+    overflow: visible !important;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
+}
+
+/* Zeit nur einmal anzeigen:
+   Wenn dein Event-Text die Uhrzeit schon enthält, blendet das die FC-Zeit aus. */
+.fc .fc-event-time {
+    display: none;
+}
+
+/* =====================================
    Formular "Neue Mahlzeit hinzufügen"
    ===================================== */
 .meal-form {

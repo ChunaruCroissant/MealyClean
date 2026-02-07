@@ -164,6 +164,20 @@ header {
     flex-direction: column;
 }
 
+/* Alte Implementierung hatte Checkboxen im Card-Header – die sind redundant */
+.recipe-item .select-recipe-checkbox {
+    display: none !important;
+}
+
+/* Fallback-Style, falls noch <span class="recipe-name"> benutzt wird */
+.recipe-item .recipe-name {
+    display: block;
+    padding: 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
 .recipe-item:hover {
     transform: translateY(-4px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -176,6 +190,16 @@ header {
     height: 200px;
     object-fit: cover;
     border-bottom: 1px solid var(--border-light);
+}
+
+/* Wenn kein Bild vorhanden ist, zeigen wir einen sehr hellen Cyan-Placeholder */
+.recipe-image--placeholder {
+    background: #ecfeff; /* extrem helles Cyan */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
 }
 
 /* Info-Teil */
