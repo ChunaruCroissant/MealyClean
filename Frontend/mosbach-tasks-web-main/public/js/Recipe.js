@@ -185,10 +185,9 @@ function addIngredient(button) {
       <input type="number" name="ingredient_amount[]" placeholder="Menge" class="ingredient-input" required>
       <select name="ingredient_unit[]" class="ingredient-input" required>
         <option value="g">Gramm (g)</option>
-        <option value="kg">Kilogramm (kg)</option>
+        
         <option value="ml">Milliliter (ml)</option>
-        <option value="l">Liter (l)</option>
-        <option value="stück">Stück</option>
+        
       </select>
       <button type="button" class="add-ingredient-btn" onclick="addIngredient(this)">+</button>
       <button type="button" class="remove-ingredient-btn" onclick="removeIngredient(this)">-</button>
