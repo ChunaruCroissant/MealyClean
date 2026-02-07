@@ -312,54 +312,6 @@ public class MappingController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fehler: Benutzer nicht gefunden.");
             }
 
-//            List<Integer> RecipeIDS = recipeManager.readRecipeIDs(user);
-//            List<String> RecipeNames = recipeManager.readRecipeName(user);
-//            List<TimeConv> MealTimes = mealManager.readTime(user);
-//            List<SendNutriConv> NutritionValues = new ArrayList<>();
-//
-//            if (RecipeIDS.isEmpty() || RecipeNames.isEmpty() || MealTimes.isEmpty()) {
-//                Logger.getLogger(MealManager.class.getName()).log(Level.INFO, "Fehler: Keine Daten für Benutzer vorhanden.");
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fehler: Es sind keine Daten für diesen Benutzer vorhanden.");
-//            }
-//
-//            // Nutri-Werte anfragen und prüfen, ob alle erfolgreich geladen wurden
-//            for (int id : RecipeIDS) {
-//                try {
-//                    NutritionConv nutris = recipeManager.sendNutritionRequest(
-//                            recipeManager.generateIngredientString(
-//                                    recipeManager.readRecipeIngredientName(id),
-//                                    recipeManager.readRecipeIngredientAmount(id)
-//                            )
-//
-//                    );
-//                    System.out.println(nutris.toString());
-//                    if (nutris == null) {
-//                        Logger.getLogger(RecipeManager.class.getName()).log(Level.SEVERE, "Nährwertdaten fehlen für Rezept-ID: " + id);
-//                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fehler: Die Nährwertdaten konnten nicht vollständig geladen werden.");
-//                    }
-//                    NutritionValues.add(new SendNutriConv(nutris.getCaloriesKcal(), nutris.getProteinG(), nutris.getTotalCarbohydratesG(), nutris.getTotalFatG()));
-//                } catch (Exception e) {
-//                    Logger.getLogger(RecipeManager.class.getName()).log(Level.SEVERE, "Fehler beim Laden der Nährwerte für Rezept-ID: " + id, e);
-//                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Laden der Nährwertdaten.");
-//                }
-//            }
-//
-//            // Protokollieren der Listenlängen
-//            Logger.getLogger(MealPlanConverter.class.getName()).log(Level.INFO, "RecipeNames size: " + RecipeNames.size());
-//            Logger.getLogger(MealPlanConverter.class.getName()).log(Level.INFO, "MealTimes size: " + MealTimes.size());
-//            Logger.getLogger(MealPlanConverter.class.getName()).log(Level.INFO, "NutritionValues size: " + NutritionValues.size());
-//
-//            if (RecipeNames.size() != MealTimes.size() || MealTimes.size() != NutritionValues.size()) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fehler: Die Listenlängen stimmen nicht überein.");
-//            }
-//
-//            return ResponseEntity.ok(mealPlanConverter.convertToMealPlanJson(RecipeNames, MealTimes, NutritionValues));
-//
-//        } catch (Exception e) {
-//            Logger.getLogger(MealManager.class.getName()).log(Level.SEVERE, "Fehler in der /mealplan-Anfrage", e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ein unerwarteter Fehler ist aufgetreten.");
-//        }
-//    }
             List<TimeConv> MealTimes = mealManager.readTime(user);
             List<Integer> RecipeIDS = mealManager.readMealPlanRecipeIds(user);
             List<String> RecipeNames = recipeManager.readRecipeNamesByIds(RecipeIDS);

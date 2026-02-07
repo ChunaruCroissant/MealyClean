@@ -10,6 +10,7 @@ import mosbach.dhbw.de.tasks.persistence.repo.RatingSummaryProjection;
 import mosbach.dhbw.de.tasks.persistence.repo.RecipeRatingRepository;
 import mosbach.dhbw.de.tasks.persistence.repo.RecipeRepository;
 import mosbach.dhbw.de.tasks.persistence.repo.UserRepository;
+import mosbach.dhbw.de.tasks.service.EmailService;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,8 @@ public class RecipeManager {
     private final UserRepository userRepo;
     private final RecipeRatingRepository ratingRepo;
 
+    private final EmailService emailService;
+
     // Nutrition API settings (override via ENV/properties)
     @Value("${mealy.nutrition.api.url:https://gustar-io-deutsche-rezepte.p.rapidapi.com/nutrition}")
     private String nutritionApiUrl;
@@ -39,10 +42,11 @@ public class RecipeManager {
     private String nutritionApiHost;
 
 
-    public RecipeManager(RecipeRepository recipeRepo, UserRepository userRepo, RecipeRatingRepository ratingRepo) {
+    public RecipeManager(RecipeRepository recipeRepo, UserRepository userRepo, RecipeRatingRepository ratingRepo, EmailService emailService) {
         this.recipeRepo = recipeRepo;
         this.userRepo = userRepo;
         this.ratingRepo = ratingRepo;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -358,8 +362,10 @@ public class RecipeManager {
             if (comment.isBlank()) comment = null;
         }
 
-        RecipeRatingEntity e = ratingRepo.findByRecipe_IdAndRater_Id(recipeId, rater.getId())
-                .orElseGet(RecipeRatingEntity::new);
+        var existingOpt = ratingRepo.findByRecipe_IdAndRater_Id(recipeId, rater.getId());
+
+        boolean existedBefore = existingOpt.isPresent();
+        RecipeRatingEntity e = existingOpt.orElseGet(RecipeRatingEntity::new);
 
         e.setRecipe(recipe);
         e.setRater(rater);
@@ -367,6 +373,29 @@ public class RecipeManager {
         e.setComment(comment);
 
         ratingRepo.save(e);
+
+        // Best-effort notification to recipe owner (only on first rating by this user)
+        if (!existedBefore) {
+            try {
+                UserEntity owner = recipe.getOwner();
+                if (owner != null && owner.getEmail() != null && !owner.getEmail().isBlank()) {
+                    String ownerEmail = owner.getEmail();
+                    String raterEmail = rater.getEmail();
+                    if (raterEmail == null || !ownerEmail.equalsIgnoreCase(raterEmail)) {
+                        emailService.sendRecipeRated(
+                                ownerEmail,
+                                owner.getUserName(),
+                                recipe.getName(),
+                                raterEmail,
+                                rater.getUserName(),
+                                stars,
+                                comment
+                        );
+                    }
+                }
+            } catch (Exception ignore) {
+            }
+        }
         return true;
     }
 
