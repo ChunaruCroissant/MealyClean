@@ -1,65 +1,82 @@
+/* =========================================
+   Mealy – Rezeptdetails (Clean Blue Style)
+   Quelle: Frontend zu Richard v2, angepasst für aktuelles HTML.
+   ========================================= */
+
+:root {
+    --primary-blue: #2563eb;
+    --primary-hover: #1d4ed8;
+    --success-green: #10b981; /* Für "Geteilt"-Status */
+    --bg-page: #f1f5f9;
+    --bg-card: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-light: #cbd5e1;
+}
+
+/* Grundlayout */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #e0f7f5;
-    margin: 0;
-    padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+
+    /* WICHTIG: aktuelles HTML hat 2 Body-Children (Container + Back-Link).
+       Deshalb flex-direction: column, sonst liegen sie nebeneinander. */
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
 
-}
-.backToRecipes {
-    color: #007bff;
-    font-weight: bold;
-    text-decoration: none;
-    margin: 100px 0;
-    display: inline-block;
-    text-align: center;
-    position: relative;
-    top: 10px;
-    left: 10px;
+    padding: 2rem 1rem 3rem;
 }
 
-.backToRecipes:hover {
-    text-decoration: underline;
-}
-
+/* Rezept-Detail Container */
 .recipe-detail-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 60px 20px;
-    width: 80%;
-    max-width: 600px;
-    background-color: #ffffff;
+    padding: 2.5rem 1.5rem;
+    width: min(650px, 92vw);
+    background-color: var(--bg-card);
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 60px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 #recipe-name {
-    color: #0295A9;
+    color: var(--primary-blue);
     text-align: center;
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    margin: 0 0 1.25rem 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.08);
 }
 
+/* Bild */
 #recipe-image {
     width: 100%;
+    max-width: 420px;
     height: auto;
     border-radius: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 1rem;
 }
 
+/* Rezeptbeschreibung */
 #recipe-description {
-    color: #666;
-    font-size: 1em;
+    color: var(--text-muted);
+    font-size: 1rem;
     text-align: center;
-    margin-bottom: 20px;
+    margin: 0 0 1.25rem 0;
 }
 
+/* Zutaten-Liste */
 #ingredient-list {
     list-style-type: none;
     padding: 0;
@@ -68,62 +85,183 @@ body {
 }
 
 #ingredient-list li {
-    background-color: #f4fbfa;
-    padding: 10px;
-    border-radius: 5px;
+    background-color: rgba(37, 99, 235, 0.04);
+    padding: 10px 12px;
+    border-radius: 6px;
     margin-bottom: 10px;
+    border: 1px solid rgba(203, 213, 225, 0.8);
 }
 
+/* Nährwerte Box */
+.nutrition-box {
+    background-color: var(--bg-page);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 1.25rem 0;
+    width: 100%;
+}
+
+.nutrition-box h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--primary-blue);
+    font-size: 1.2rem;
+    border-bottom: 2px solid var(--primary-blue);
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.nutrition-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+.nutrition-item {
+    background-color: var(--bg-card);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    flex: 1 1 120px;
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.nutrition-item strong {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.nutrition-item span {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+/* Buttons */
 #delete-recipe-btn {
     background-color: #e74c3c;
     color: white;
     border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    font-size: 1em;
+    border-radius: 6px;
+    padding: 0.7rem 1.1rem;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.2s ease;
+    margin-top: 0.5rem;
 }
 
 #delete-recipe-btn:hover {
     background-color: #c0392b;
 }
 
-/* Footer */
-footer {
-    text-align: center;
-    font-size: 0.8em;
-    color: #666;
-    padding: 20px;
-}
-
-
-/* Nutrition box */
-.nutrition-box {
+/* Share Actions (Kompatibilität: existiert als .share-actions + #share-recipe-btn/#unshare-recipe-btn) */
+.share-actions {
     width: 100%;
-    background-color: #f4fbfa;
-    border-radius: 10px;
-    padding: 15px;
-    margin: 10px 0 20px 0;
-}
-
-.nutrition-box h3 {
-    margin: 0 0 10px 0;
-    color: #0295A9;
-    text-align: center;
-}
-
-.nutrition-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.nutrition-item {
-    background-color: #ffffff;
-    border-radius: 8px;
-    padding: 10px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+
+#share-recipe-btn,
+#unshare-recipe-btn {
+    padding: 0.65rem 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#share-recipe-btn {
+    background: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    color: #fff;
+}
+
+#share-recipe-btn:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+#unshare-recipe-btn {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+}
+
+#unshare-recipe-btn:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+/* Zurück zur Rezeptsammlung Link */
+#backToRecipes,
+.backToRecipes {
+    color: var(--primary-blue);
+    font-weight: 700;
+    text-decoration: none;
+    margin-top: 1.5rem;
+    display: inline-block;
+}
+
+#backToRecipes:hover,
+.backToRecipes:hover {
+    text-decoration: underline;
+}
+
+/* Navbar Styles (falls die Seite später einen Header bekommt) */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-light);
+    height: 70px;
+    display: flex;
     align-items: center;
+}
+
+.navbar {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.navbar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.navbar ul li a {
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.5rem 0;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.navbar ul li a:hover,
+.navbar ul li a.active {
+    color: var(--primary-blue);
 }
